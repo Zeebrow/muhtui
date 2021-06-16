@@ -60,6 +60,16 @@ func main() {
 		return string(b)
 	}
 
+	// golog_reader := func(logfile string, view tview.TextView) string {
+	// 	file, _ := os.Open(logfile)
+	// 	p, err := exec.LookPath("tail")
+	// 	if err != nil {
+	// 		log.Fatalf("Logfile not found: %v. %v", logfile, err)
+	// 	}
+	// 	cmd := exec.Command(p)
+	// 	return *cmd.Stdout
+
+	// }
 	// load_yaml := func(filename string) (*mydata, error) {
 	// 	buf, err := ioutil.ReadFile(filename)
 	// 	if err != nil {
@@ -74,30 +84,53 @@ func main() {
 	// 	}
 	// 	return c, nil
 	// }
+	preview := tview.NewTextView().
+		SetWordWrap(false).
+		SetDynamicColors(true).
+		SetRegions(true).
+		SetChangedFunc(func() {
+			app.Draw()
+		}).
+		SetScrollable(true)
 
+	logview := tview.NewTextView().
+		SetWordWrap(true).
+		SetChangedFunc(func() {
+			app.Draw()
+		}).
+		SetBackgroundColor(tcell.ColorLightBlue)
 	muhdropdown := tview.NewDropDown().SetLabel("click to select:").
 		SetOptions([]string{"muhfirstoption", example_yaml_file, "mop3", "mop4", "mop5", "mop6"}, func(o string, i int) {
 			log.Printf("muhbox selection now (%v)%v ", i, o)
 			d := read_yaml(o)
 			log.Printf("%s", d)
+			preview.SetText(d)
+			// bts, err := fmt.Fprintf(preview, "%s", d)
+			// if err != nil {
+			// 	log.Fatalf("Failed writing yaml to preview box.")
+			// }
+			// log.Printf("Bytes: %v", bts)
 			// data, err := load_yaml(o)
 			// if err != nil {
 			// 	log.Printf("error retrieving yaml data from option (%v)", o)
 			// } else {
 			// 	log.Printf("%v", data)
 			// }
-		}).SetCurrentOption(0)
+		}).SetCurrentOption(1)
 
 	logframe := tview.NewFlex().SetDirection(tview.FlexRow).
 		//AddItem(tview.NewBox().SetBorder(true).SetTitle("muhactivities").SetBackgroundColor(tcell.ColorDarkGoldenrod), 0, 1, false).
-		AddItem(tview.NewBox().SetBorder(true).SetTitle("muhlogs").SetBackgroundColor(tcell.ColorDarkGoldenrod), 0, 1, false)
+		// AddItem(tview.NewBox().SetBorder(true).SetTitle("logs").SetBackgroundColor(tcell.ColorDarkGoldenrod), 0, 1, false)
+		AddItem(logview, 0, 1, false)
+
+	// filler := tview.NewBox()
 
 	editor := tview.NewFlex().SetDirection(tview.FlexColumn).
 		//AddItem(tview.NewBox().SetBorder(true).SetTitle("mmmmmmmm").SetBackgroundColor(tcell.ColorDarkRed), 0, 1, false).
-		AddItem(muhdropdown, 0, 5, false).
+		AddItem(muhdropdown, 0, 2, false).
 		//AddItem(tview.NewBox().SetBorder(true).SetTitle("uuuuuuuu").SetBackgroundColor(tcell.ColorDarkKhaki), 0, 2, false).
-		AddItem(tview.NewBox().SetBorder(true).SetTitle("preview").SetBackgroundColor(tcell.ColorDarkOrchid), 0, 3, false)
-
+		AddItem(preview, 0, 4, false)
+		//.SetBorder(true).SetTitle("preview").SetBackgroundColor(tcell.ColorDarkOrchid
 	muhtopbox := tview.NewBox().
 		SetBorder(true).
 		SetTitle("muhtopbox").
